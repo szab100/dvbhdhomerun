@@ -33,6 +33,16 @@
 
 using namespace std;
 
+static uint32_t parse_ip_addr(const char *str)
+{
+	unsigned int a[4];
+	if (sscanf(str, "%u.%u.%u.%u", &a[0], &a[1], &a[2], &a[3]) != 4) {
+		return 0;
+	}
+
+	return (uint32_t)((a[0] << 24) | (a[1] << 16) | (a[2] << 8) | (a[3] << 0));
+}
+
 HdhomerunController::HdhomerunController(int _maxDevices) 
    : m_maxDevices(_maxDevices), m_dbg(0)
 {
@@ -70,8 +80,15 @@ HdhomerunController::HdhomerunController(int _maxDevices)
   // and I don't see a way to programmatically check libhdhomerun's API version.
   // ...really fragile API design...
   memset(devices, 0, sizeof(devices));
+  
+  uint32_t ip = 0;
+  string target_ip("");
+  if(conf.GetSecValue("libhdhomerun", "target_ip", target_ip)) {
+    LOG() << "Searching on target IP:" << target_ip << endl;
+    ip = parse_ip_addr(target_ip.c_str());
+  }
 
-  int numOfDevices = hdhomerun_discover_find_devices_custom_v2(0, HDHOMERUN_DEVICE_TYPE_TUNER, HDHOMERUN_DEVICE_ID_WILDCARD, devices, m_maxDevices);
+  int numOfDevices = hdhomerun_discover_find_devices_custom_v2(ip, HDHOMERUN_DEVICE_TYPE_TUNER, HDHOMERUN_DEVICE_ID_WILDCARD, devices, m_maxDevices);
   LOG() << "Num of devices = " << numOfDevices << endl;
 
   if(numOfDevices == 0) {

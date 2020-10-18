@@ -29,3 +29,6 @@ disable=true
 [libhdhomerun]
 #enable=true
 #logfile=/var/log/dvbhdhomerun_libhdhomerun.log
+
+## Specify target IP address of the HDHomeRun device (if not on the same subnet)
+#target_ip=1.2.3.4 
